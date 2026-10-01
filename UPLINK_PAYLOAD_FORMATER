@@ -1,0 +1,28 @@
+function decodeUplink(input) {
+  var result = "";
+  
+  for (var i = 0; i < input.bytes.length; i++) {
+    result += String.fromCharCode(input.bytes[i]);
+  }
+
+  var parsedJSON = null;
+  var warnings = [];
+  var errors = [];
+
+  try {
+    parsedJSON = JSON.parse(result);
+  } catch (e) {
+    warnings.push("No se pudo parsear el mensaje como JSON.");
+    errors.push(e.message);
+  }
+
+  return {
+    data: {
+      bytes: input.bytes,
+      text: result,
+      json: parsedJSON 
+    },
+    warnings: warnings,
+    errors: errors
+  };
+}

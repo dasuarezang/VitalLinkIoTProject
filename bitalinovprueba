@@ -1,0 +1,48 @@
+import json
+import serial
+import time
+import numpy as np
+from bitalino import BITalino
+from biosppy.signals import ecg 
+
+device = BITalino("/dev/rfcomm0")
+device.start(1, [1])
+sensor_id = "ECG"
+samplerate = 100
+
+arduino_port = "/dev/ttyS0"
+baudrate = 9600
+
+arduino = serial.Serial(arduino_port, baudrate, timeout=1)
+print('Press Cntrl+C to stop sending...')
+
+while True:
+  print('Taking data...')
+  #nummuestras = 5 * samplerate
+  nummuestras = 10
+  data = device.read(nummuestras)
+  print('mostra presa')
+  analog = [row[5] for row in data]
+  
+#Procesamiento con BioSPPy############################################################
+  bpm = 0
+  
+  try:
+    out = ecg.ecg(signal=analog, sampling_rate=samplerate, show=False)
+    
+    if len(out['heart_rate']) > 0:
+      bpm = int(np.mean(out['heart_rate']))
+      
+  except Exception as e:
+    print('No se detectaron latidos o señal ruidosa')
+##########################################################################################
+
+  sample = {
+            "timestamp": time.time(), 
+            "sensor": sensor_id,
+            "bpm": int(bpm),
+        }
+
+  json_data = json.dumps(sample)
+  print("sending: " + str(json_data))
+  arduino.write((json_data).encode("utf-8")) 

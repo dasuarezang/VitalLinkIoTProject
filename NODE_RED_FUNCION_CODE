@@ -1,0 +1,18 @@
+var tts_payload = msg.payload;
+var uplink = tts_payload.uplink_message || {};
+var decoded = uplink.decoded_payload || {}; 
+
+if (!decoded.json) {
+    return null; 
+}
+
+var valor_cardiaco = decoded.json.bpm;
+
+msg.query = "INSERT INTO sensor_data (payload, created_at, frec_cardiaca) VALUES ($1, timezone('Europe/Madrid', now()), $2)";
+
+msg.params = [
+    JSON.stringify(decoded), 
+    valor_cardiaco           
+];
+
+return msg;

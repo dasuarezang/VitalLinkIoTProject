@@ -1,0 +1,17 @@
+var data_hex = "01";
+
+var mi_buffer = Buffer.from(data_hex, 'hex');
+var data_base64 = mi_buffer.toString('base64');
+
+msg.payload = {
+    "downlinks": [{
+        "f_port": 1,        
+        "frm_payload": data_base64, 
+        "priority": "NORMAL",
+        "confirmed": false  
+    }]
+};
+
+msg.topic = "v3/datos-vitalino@pbeg4/devices/" + "arduino" + "/down/push";
+
+return msg;
